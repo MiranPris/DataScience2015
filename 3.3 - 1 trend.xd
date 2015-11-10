@@ -1,0 +1,17 @@
+for $doc in doc("eprints-2015-02-01.xml")/eprints/paper
+    order by $doc/date_issue
+
+let $keywords := string-join($doc/keywords/text(),'.')
+let $string := upper-case(replace(normalize-space($keywords),'(, )|(; )|(  )|( - )', '.'))
+let $toks := tokenize($string,'[.;,!]+')
+for $t in distinct-values($toks)
+
+for $datepapers in $doc
+    where every $datepaper in upper-case($datepapers/keywords) satisfies contains ($datepaper, $t) 
+
+for $words in $t return
+    if (string-length($t) gt 1) then
+
+        for $concat in concat(replace(normalize-space($datepapers/date_issue),'-(\d{2})',''),' ',$words)
+        return $concat
+    else()

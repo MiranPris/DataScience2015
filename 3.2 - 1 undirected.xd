@@ -1,0 +1,13 @@
+<graph id="G" edgedefault="undirected"> {
+     for $doc in doc("eprints-2015-02-01.xml")/eprints/paper
+     for $author in distinct-values($doc/author)
+     let $refs := $doc[author=$author]
+     let $coauthors := ($refs/author[. ne $author])
+     order by $author
+     return (
+     <node id="{$author}" />,
+     for $coauthor in distinct-values($coauthors)
+     order by $coauthor
+     return
+     <edge source="{$coauthor}" target="{$author}" />)}
+</graph>

@@ -1,0 +1,9 @@
+for $doc in doc("eprints-2015-02-01.xml")/eprints/paper
+where every $paper in $doc/research_programs satisfies contains ($paper,'CTIT')
+let $authors := $doc/author[fn:position()=1]
+let $ids := $authors/@id
+for $id in distinct-values($ids)
+group by $id
+let $count := count($ids[. = $id])
+order by $count descending
+return concat($id,',',$count)

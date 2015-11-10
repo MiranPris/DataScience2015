@@ -1,0 +1,23 @@
+for $doc in doc("eprints-2015-02-01.xml")/eprints/paper
+    order by $doc/date_issue
+
+let $keywords := string-join($doc/keywords/text(),'.')
+let $string := upper-case(replace(normalize-space($keywords),'(, )|(; )|(  )|( - )', '.'))
+let $toks := tokenize($string,'[.;,!]+')
+for $t in distinct-values($toks)
+    
+for $datepapers in $doc
+    where every $datepaper in upper-case($datepapers/keywords) satisfies contains ($datepaper, $t) 
+
+for $authors in $doc/author
+    where every $author in upper-case($authors/../keywords) satisfies contains ($author, $t) 
+for $concat in concat(replace($datepapers/date_issue,'-(\d{2})',''),' ',$t)
+for $trending in $concat
+    where every $trend in $trending satisfies contains ($trend,'2011') or contains ($trend,'2012') or contains ($trend,'2013') or contains ($trend,'2014') or contains ($trend,'2015')
+    
+for $stripped in normalize-space(replace($trending,'(\d{2})',''))      
+let $keyword_list := ('TELEMEDICINE', 'INTEGRATED OPTICS', 'PHYSICAL ACTIVITY', 'SCHEDULING', 'SECURITY', 'STROKE', 'MODEL CHECKING', 'COPD', 'MARKOV AUTOMATA', 'BRAIN-COMPUTER INTERFACES')
+for $trendy in $stripped[.=$keyword_list]         
+    group by $authors
+    order by count(distinct-values($trendy)) descending
+return (concat($authors,'-',count(distinct-values($trendy))),distinct-values($trendy))

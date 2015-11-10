@@ -1,0 +1,16 @@
+for $doc in doc("eprints-2015-02-01.xml")/eprints/paper
+where every $paper in $doc/research_programs satisfies contains ($paper,'CTIT')
+for $a in $doc/author[fn:position()=1]
+let $b :=
+  if(not($a/@p)) then concat($a, ' ', $a/@t)
+  else concat($a, ' ', $a/@t, ', ', $a/@p)
+ group by $b
+ order by xs:int(count($a)) descending
+ return (<Author name= "{$b}" Nrofpapers="{count($a)}" />,
+   for $c in $doc/type[../author=$a]
+   let $d :=
+    if(not($c/@p)) then concat($c, ' ', $c/@t)
+    else concat($c, ' ', $c/@t, ', ', $c/@p)
+   group by $d
+   order by xs:int(count($c)) descending
+   return ($d,count($c)))
